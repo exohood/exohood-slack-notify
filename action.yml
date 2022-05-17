@@ -1,0 +1,59 @@
+# action.yml
+name: 'Notify slack'
+description: 'Notify slack from github action'
+
+inputs:
+  text:
+    description: 'Message to send'
+    required: true
+    default: 'Ping'
+  channel:
+    description: 'Channel to notify, e.g. #my-channel'
+    required: true
+  token:
+    description: 'Slack API token'
+    required: true
+    default: 'NO_TOKEN'
+
+outputs:
+  success:
+    description: 'Whether request was successful'
+    value: ${{ steps.notify.outputs.success }}
+
+runs:
+  using: "composite"
+  steps: 
+    - id: install
+      shell: bash
+      run: sudo apt-get install -y jq 
+      
+    - id: notify
+      shell: bash
+      env:
+        TOKEN: ${{ inputs.token }}
+        TEXT:  ${{ inputs.text }}
+      run: |
+        echo "Notifying ${{ inputs.channel }} via Slack..."
+        
+        echo "TEXT is:"
+        echo $TEXT
+        
+        JSON='{
+            "text": ":github: ${{ inputs.text }}", 
+            "channel": "${{ inputs.channel }}", 
+            "as_user": "True"
+        }'
+        RESULT=$( curl --location --request POST 'https://slack.com/api/chat.postMessage' \
+        --header 'Content-Type: application/json' \
+        --header "Authorization: Bearer $TOKEN" \
+        --data-raw "${JSON}" )
+        SUCCESS=$( echo $RESULT | jq -r '.ok' )
+        
+        echo "::set-output name=success::$(echo $SUCCESS)"
+        if [ $SUCCESS != 'true' ]; then
+          echo "Error when making request"
+          echo $RESULT
+          exit 1
+        fi
+        
+        echo "Notified successfully"
