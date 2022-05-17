@@ -1,0 +1,26 @@
+name: "Test notify reusable"
+
+on: 
+  workflow_dispatch:
+    inputs:
+      text:
+        type: string
+        required: true
+        default: ":github: test"
+      channel:
+        type: string
+        required: true
+        default: "#channel"
+      token:
+        type: string
+        required: true
+
+jobs:
+  notify:
+    name: Notify slack
+    uses: exohood/exohood-actions-slack-notify/workflows/run.yml@main
+    with:
+      text:    ${{ github.event.inputs.text }}
+      channel: ${{ github.event.inputs.channel }}
+    secrets:
+      token:   ${{ github.event.inputs.token }}
