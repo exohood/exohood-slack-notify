@@ -1,0 +1,54 @@
+on:
+  workflow_call:
+    inputs:
+      text:
+        type: string
+        description: 'Message to send'
+        required: true
+        default: 'Ping'
+      channel:
+        type: string
+        description: 'Channel to notify, e.g. #my-channel'
+        required: true
+    secrets:
+      token:
+        description: 'Slack API token'
+        required: false
+
+name: "Notify slack"
+
+jobs:
+  the-job:
+    runs-on: ubuntu-latest
+    steps:
+      - id: install
+        shell: bash
+        run: sudo apt-get install -y jq
+
+      - id: notify
+        shell: bash
+        env:
+          TOKEN: ${{ secrets.token }}
+          DEFAULT_TOKEN: ${{ secrets.SLACK_API_TOKEN }}
+        run: |
+          echo "Notifying ${{ inputs.channel }} via Slack..."
+          if [ $TOKEN == 'NO_TOKEN' ]; then
+            TOKEN=$DEFAULT_TOKEN
+          fi
+          JSON='{
+              "text": ":github: ${{ inputs.text }}", 
+              "channel": "${{ inputs.channel }}", 
+              "as_user": "True"
+          }'
+          RESULT=$( curl --location --request POST 'https://slack.com/api/chat.postMessage' \
+          --header 'Content-Type: application/json' \
+          --header "Authorization: Bearer $TOKEN" \
+          --data-raw "${JSON}" )
+          SUCCESS=$( echo $RESULT | jq -r '.ok' )
+          echo "::set-output name=success::$(echo $SUCCESS)"
+          if [ $SUCCESS != 'true' ]; then
+            echo "Error when making request"
+            echo $RESULT
+            exit 1
+          fi
+          echo "Notified successfully"
