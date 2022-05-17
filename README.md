@@ -1,4 +1,4 @@
-# actions-slack-notify
+# Actions-slack-notify
 Send slack notifications with easy
 
 # Usage
