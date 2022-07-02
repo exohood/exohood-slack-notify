@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Notify slack
         id: notify
-        uses: exohood/exohood-actions-slack-notify@main
+        uses: exohood/exohood-slack-notify@main
         with:
           text:    ${{ github.event.inputs.text }}
           channel: ${{ github.event.inputs.channel }}
