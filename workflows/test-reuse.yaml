@@ -18,7 +18,7 @@ on:
 jobs:
   notify:
     name: Notify slack
-    uses: exohood/exohood-actions-slack-notify/workflows/run.yml@main
+    uses: exohood/exohood-slack-notify/.github/workflows/run.yml@main
     with:
       text:    ${{ github.event.inputs.text }}
       channel: ${{ github.event.inputs.channel }}
