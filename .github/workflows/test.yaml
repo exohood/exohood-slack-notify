@@ -1,0 +1,29 @@
+name: "Test notify"
+
+on: 
+  workflow_dispatch:
+    inputs:
+      text:
+        type: string
+        required: true
+        default: ":github: test"
+      channel:
+        type: string
+        required: true
+        default: "#channel"
+      token:
+        type: string
+        required: true
+
+jobs:
+  notify:
+    runs-on: [ubuntu-latest] # can't use self-hosted on action because it is public
+    name: Notify slack with user params
+    steps:
+      - name: Notify slack
+        id: notify
+        uses: exohood/exohood-slack-notify@main
+        with:
+          text:    ${{ github.event.inputs.text }}
+          channel: ${{ github.event.inputs.channel }}
+          token:   ${{ github.event.inputs.token }}
